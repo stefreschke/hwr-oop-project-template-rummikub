@@ -1,0 +1,190 @@
+openapi: 3.0.3
+info:
+  title: Template Service API
+  description: API for the template service
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+paths:
+  /trains:
+    post:
+      summary: Create a new train
+      operationId: createTrain
+      tags:
+        - TrainWrite
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTrainRequest'
+      responses:
+        '201':
+          description: Train created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrainCreatedResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /trains/{trainId}:
+    post:
+      summary: Update an existing train
+      operationId: updateTrain
+      tags:
+        - TrainWrite
+      parameters:
+        - name: trainId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier of the train to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTrainRequest'
+      responses:
+        '200':
+          description: Train updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrainResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Train not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      summary: Get train by ID
+      operationId: getTrain
+      tags:
+        - TrainRead
+      parameters:
+        - name: trainId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier of the train
+      responses:
+        '200':
+          description: Train retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrainResponse'
+        '404':
+          description: Train not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    CreateTrainRequest:
+      type: object
+      required:
+        - trainNumber
+        - maxSpeed
+        - name
+      properties:
+        trainNumber:
+          type: integer
+          description: The train number
+        maxSpeed:
+          type: integer
+          description: The maximum speed of the train in km/h
+        name:
+          type: string
+          description: The name of the train
+    TrainCreatedResponse:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          description: The unique identifier of the created train
+    UpdateTrainRequest:
+      type: object
+      required:
+        - trainNumber
+        - maxSpeed
+        - name
+      properties:
+        trainNumber:
+          type: integer
+          description: The train number
+        maxSpeed:
+          type: integer
+          description: The maximum speed of the train in km/h
+        name:
+          type: string
+          description: The name of the train
+    TrainResponse:
+      type: object
+      required:
+        - id
+        - trainNumber
+        - maxSpeed
+        - name
+      properties:
+        id:
+          type: string
+          description: The unique identifier of the train
+        trainNumber:
+          type: integer
+          description: The train number
+        maxSpeed:
+          type: integer
+          description: The maximum speed of the train in km/h
+        name:
+          type: string
+          description: The name of the train
+    ErrorResponse:
+      type: object
+      required:
+        - status
+        - error
+        - message
+      properties:
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string

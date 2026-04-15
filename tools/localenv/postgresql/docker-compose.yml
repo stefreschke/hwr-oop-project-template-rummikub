@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: hwr-oop-template-db-postgres
+    environment:
+      POSTGRES_DB: template_db
+      POSTGRES_USER: template_user
+      POSTGRES_PASSWORD: TOTALLY_RANDOM_PASSWORD_1337_42
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data-7f3a9b:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  postgres-data-7f3a9b:
+

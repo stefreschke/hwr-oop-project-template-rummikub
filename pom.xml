@@ -1,0 +1,424 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>hwr.oop.lecture.examples</groupId>
+  <artifactId>template</artifactId>
+  <version>0.1.0</version>
+  <packaging>pom</packaging>
+
+  <modules>
+    <module>core</module>
+    <module>persistence</module>
+    <module>applications</module>
+  </modules>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <kotlin.version>2.3.0</kotlin.version>
+    <java.version>21</java.version>
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.target>21</maven.compiler.target>
+
+    <!-- Dependency versions -->
+    <junit-bom.version>6.0.3</junit-bom.version>
+    <assertj.version>3.27.6</assertj.version>
+    <spring-boot.version>4.0.5</spring-boot.version>
+    <jackson.version>2.18.1</jackson.version>
+    <swagger-annotations.version>2.2.26</swagger-annotations.version>
+    <openapitools-jackson-nullable.version>0.2.6</openapitools-jackson-nullable.version>
+    <openapi-generator.version>7.10.0</openapi-generator.version>
+    <jakarta-validation.version>3.0.2</jakarta-validation.version>
+    <jakarta-annotation.version>2.1.1</jakarta-annotation.version>
+    <kotlinx-serialization.version>1.9.0</kotlinx-serialization.version>
+    <okio.version>3.16.0</okio.version>
+    <clikt.version>5.0.3</clikt.version>
+    <kotlin-logging.version>8.0.01</kotlin-logging.version>
+    <exposed.version>1.0.0</exposed.version>
+    <postgresql.version>42.7.3</postgresql.version>
+    <hikari-cp.version>7.0.2</hikari-cp.version>
+    <liquibase.version>4.31.0</liquibase.version>
+    <testcontainers.version>1.20.3</testcontainers.version>
+    <testcontainers-postgresql.version>1.20.0</testcontainers-postgresql.version>
+    <mockk.version>1.13.12</mockk.version>
+
+    <!-- Plugin versions -->
+    <maven-surefire.version>3.5.2</maven-surefire.version>
+    <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
+    <maven-shade-plugin.version>3.6.0</maven-shade-plugin.version>
+  </properties>
+
+  <!-- kotlin-stdlib inherited by all submodules -->
+  <dependencies>
+    <dependency>
+      <groupId>org.jetbrains.kotlin</groupId>
+      <artifactId>kotlin-stdlib</artifactId>
+      <version>${kotlin.version}</version>
+    </dependency>
+  </dependencies>
+
+  <dependencyManagement>
+    <dependencies>
+      <!-- Internal modules -->
+      <dependency>
+        <groupId>hwr.oop.lecture.examples</groupId>
+        <artifactId>core</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>hwr.oop.lecture.examples</groupId>
+        <artifactId>core</artifactId>
+        <version>${project.version}</version>
+        <classifier>tests</classifier>
+        <type>test-jar</type>
+      </dependency>
+      <dependency>
+        <groupId>hwr.oop.lecture.examples</groupId>
+        <artifactId>persistence-filesystem</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>hwr.oop.lecture.examples</groupId>
+        <artifactId>persistence-sql</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>hwr.oop.lecture.examples</groupId>
+        <artifactId>config</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <!--
+        JUnit BOM: Imports the JUnit 6 bill of materials.
+        Centrally manages versions for all JUnit Jupiter, Platform, and related
+        artifacts, so child modules can declare JUnit dependencies without versions.
+      -->
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>${junit-bom.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <!--
+        AssertJ: A fluent assertion library for Java and Kotlin.
+        Used in all modules as the primary assertion library in tests.
+        Grouped here alongside the JUnit BOM as both are core testing dependencies.
+      -->
+      <dependency>
+        <groupId>org.assertj</groupId>
+        <artifactId>assertj-core</artifactId>
+        <version>${assertj.version}</version>
+      </dependency>
+
+      <!--
+        Spring Boot BOM: Imports the Spring Boot dependency bill of materials.
+        Centrally manages versions for all Spring Boot and related libraries,
+        so child modules can declare Spring dependencies without specifying versions.
+      -->
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>${spring-boot.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <!--
+        Jackson: JSON serialization library used by Spring Boot in the service module.
+        - jackson-databind: Core serialization/deserialization for REST request and response bodies.
+        - jackson-module-kotlin: Kotlin-specific support (data classes, null safety).
+        - jackson-datatype-jsr310: Java 8 date/time type support.
+      -->
+      <!-- Jackson -->
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.module</groupId>
+        <artifactId>jackson-module-kotlin</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.datatype</groupId>
+        <artifactId>jackson-datatype-jsr310</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+
+      <!--
+        OpenAPI / Swagger: Used in the service module for contract-first API development.
+        - swagger-annotations: Annotations for documenting the REST API.
+        - jackson-databind-nullable: Allows nullable fields in generated model classes.
+      -->
+      <dependency>
+        <groupId>io.swagger.core.v3</groupId>
+        <artifactId>swagger-annotations</artifactId>
+        <version>${swagger-annotations.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.openapitools</groupId>
+        <artifactId>jackson-databind-nullable</artifactId>
+        <version>${openapitools-jackson-nullable.version}</version>
+      </dependency>
+
+      <!--
+        Jakarta EE APIs: Required by the Spring Boot service module and generated OpenAPI code.
+        - jakarta.validation-api: Bean validation annotations used in API models.
+        - jakarta.annotation-api: General-purpose annotations used in generated sources.
+      -->
+      <dependency>
+        <groupId>jakarta.validation</groupId>
+        <artifactId>jakarta.validation-api</artifactId>
+        <version>${jakarta-validation.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>jakarta.annotation</groupId>
+        <artifactId>jakarta.annotation-api</artifactId>
+        <version>${jakarta-annotation.version}</version>
+      </dependency>
+
+      <!--
+        kotlinx-serialization: Kotlin's official serialization library.
+        Used to serialize/deserialize domain objects to/from JSON,
+        both for filesystem persistence and SQL storage.
+      -->
+      <dependency>
+        <groupId>org.jetbrains.kotlinx</groupId>
+        <artifactId>kotlinx-serialization-json</artifactId>
+        <version>${kotlinx-serialization.version}</version>
+      </dependency>
+
+      <!--
+        okio: A modern I/O library by Square.
+        Used in the persistence-filesystem module to read and write files.
+        Also provides a fake filesystem implementation for testing.
+      -->
+      <dependency>
+        <groupId>com.squareup.okio</groupId>
+        <artifactId>okio-jvm</artifactId>
+        <version>${okio.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.squareup.okio</groupId>
+        <artifactId>okio-fakefilesystem-jvm</artifactId>
+        <version>${okio.version}</version>
+      </dependency>
+
+      <!--
+        clikt: A Kotlin library for building command-line interfaces.
+        Used in the cli module to define and parse CLI commands and options.
+      -->
+      <dependency>
+        <groupId>com.github.ajalt.clikt</groupId>
+        <artifactId>clikt-jvm</artifactId>
+        <version>${clikt.version}</version>
+      </dependency>
+
+      <!--
+        kotlin-logging: A lightweight Kotlin logging facade built on top of SLF4J.
+        Used across service and cli modules as the primary logging API.
+        Requires an SLF4J-compatible runtime (log4j2 for service; cli uses no logging).
+      -->
+      <dependency>
+        <groupId>io.github.oshai</groupId>
+        <artifactId>kotlin-logging-jvm</artifactId>
+        <version>${kotlin-logging.version}</version>
+      </dependency>
+
+      <!--
+        Exposed: A Kotlin SQL framework by JetBrains.
+        Used in the persistence-sql module as a type-safe DSL to interact
+        with a relational database.
+      -->
+      <dependency>
+        <groupId>org.jetbrains.exposed</groupId>
+        <artifactId>exposed-core</artifactId>
+        <version>${exposed.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jetbrains.exposed</groupId>
+        <artifactId>exposed-dao</artifactId>
+        <version>${exposed.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jetbrains.exposed</groupId>
+        <artifactId>exposed-jdbc</artifactId>
+        <version>${exposed.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jetbrains.exposed</groupId>
+        <artifactId>exposed-json</artifactId>
+        <version>${exposed.version}</version>
+      </dependency>
+
+      <!--
+        postgresql: JDBC driver for PostgreSQL.
+        Declared in persistence-sql, which makes it available transitively to service
+        and cli. Also pulled in by Testcontainers tests for integration testing.
+      -->
+      <dependency>
+        <groupId>org.postgresql</groupId>
+        <artifactId>postgresql</artifactId>
+        <version>${postgresql.version}</version>
+      </dependency>
+      <!--
+        HikariCP: A high-performance JDBC connection pool.
+        Declared in persistence-sql to manage and reuse database connections efficiently.
+        Made available transitively to service and cli via the persistence-sql dependency.
+      -->
+      <dependency>
+        <groupId>com.zaxxer</groupId>
+        <artifactId>HikariCP</artifactId>
+        <version>${hikari-cp.version}</version>
+      </dependency>
+      <!--
+        Liquibase: A database schema migration tool.
+        Used in persistence-sql to apply and track schema changes
+        in a reproducible and version-controlled way.
+      -->
+      <dependency>
+        <groupId>org.liquibase</groupId>
+        <artifactId>liquibase-core</artifactId>
+        <version>${liquibase.version}</version>
+      </dependency>
+
+      <!--
+        Testcontainers: Spins up real Docker containers during tests.
+        - testcontainers: Core library providing the container lifecycle infrastructure.
+        - postgresql: Pre-configured PostgreSQL container for integration tests.
+        - junit-jupiter: JUnit 6 integration for container lifecycle management in tests.
+      -->
+      <!--
+        MockK: A Kotlin-idiomatic mocking library.
+        Used in tests to mock ports and other dependencies.
+      -->
+      <dependency>
+        <groupId>io.mockk</groupId>
+        <artifactId>mockk-jvm</artifactId>
+        <version>${mockk.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>testcontainers</artifactId>
+        <version>${testcontainers.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>postgresql</artifactId>
+        <version>${testcontainers-postgresql.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>junit-jupiter</artifactId>
+        <version>${testcontainers.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
+    <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
+
+    <plugins>
+      <!--
+        Kotlin Maven Plugin: Compiles Kotlin sources in all modules.
+        Configured with the kotlinx-serialization compiler plugin to enable
+        the @Serializable annotation processing at compile time.
+      -->
+      <plugin>
+        <groupId>org.jetbrains.kotlin</groupId>
+        <artifactId>kotlin-maven-plugin</artifactId>
+        <version>${kotlin.version}</version>
+        <executions>
+          <execution>
+            <id>compile</id>
+            <goals>
+              <goal>compile</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>test-compile</id>
+            <goals>
+              <goal>test-compile</goal>
+            </goals>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-maven-serialization</artifactId>
+            <version>${kotlin.version}</version>
+          </dependency>
+        </dependencies>
+        <configuration>
+          <jvmTarget>${java.version}</jvmTarget>
+          <compilerPlugins>
+            <plugin>kotlinx-serialization</plugin>
+          </compilerPlugins>
+        </configuration>
+      </plugin>
+
+      <!--
+        Maven Surefire Plugin: Runs unit tests during the build.
+        Configured with useModulePath=false to ensure JUnit 6 tests are
+        discovered correctly on the classpath rather than the module path.
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${maven-surefire.version}</version>
+        <configuration>
+          <useModulePath>false</useModulePath>
+        </configuration>
+      </plugin>
+    </plugins>
+
+    <pluginManagement>
+      <plugins>
+        <!--
+          Maven JAR Plugin: Used in the core module to produce an additional
+          test-jar artifact, making test fixtures and base classes available
+          to other modules as a test-scoped dependency.
+        -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>${maven-jar-plugin.version}</version>
+        </plugin>
+        <!--
+          Spring Boot Maven Plugin: Used in the service module to repackage
+          the compiled JAR into a self-contained executable Spring Boot application.
+        -->
+        <plugin>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-maven-plugin</artifactId>
+          <version>${spring-boot.version}</version>
+        </plugin>
+        <!--
+          OpenAPI Generator Plugin: Used in the service module to generate
+          server-side API interfaces and model classes from an OpenAPI specification.
+        -->
+        <plugin>
+          <groupId>org.openapitools</groupId>
+          <artifactId>openapi-generator-maven-plugin</artifactId>
+          <version>${openapi-generator.version}</version>
+        </plugin>
+        <!--
+          Maven Shade Plugin: Used in the cli module to produce a self-contained
+          executable fat JAR with all dependencies bundled.
+        -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-shade-plugin</artifactId>
+          <version>${maven-shade-plugin.version}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>

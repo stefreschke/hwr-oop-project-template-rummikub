@@ -1,0 +1,8 @@
+server:
+  port: 8080
+
+logging:
+  level:
+    root: INFO
+    hwr.oop.examples.template: INFO
+    org.jetbrains.exposed: WARN

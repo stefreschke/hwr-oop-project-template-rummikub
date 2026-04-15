@@ -1,0 +1,11 @@
+{
+	"persistence": "FILE_SYSTEM",
+	"fileSystem": {
+		"directory": "./data"
+	},
+	"sql": {
+		"jdbcUrl": "jdbc:postgresql://localhost:5432/template_db",
+		"username": "template_user",
+		"password": "TOTALLY_RANDOM_PASSWORD_1337_42"
+	}
+}

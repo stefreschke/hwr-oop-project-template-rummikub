@@ -1,0 +1,126 @@
+= HWR OOP Lecture Project Template
+
+// TODO: Change headline to better fit your project!
+
+This repository contains a student project created for an ongoing lecture on object-oriented
+programming with Kotlin at HWR Berlin (summer term 2026).
+
+WARNING: This code is for educational purposes only. Do not rely on it!
+
+== Feature Liste
+
+// TODO : Add a list of features that your project implements. This can be a simple bullet list or a tables
+
+== Modulstruktur
+
+[source]
+----
+.
+├── core/                        # Domänenlogik (keine Abhängigkeiten nach außen)
+├── persistence/
+│   ├── persistence-filesystem/  # Persistenzadapter: Dateisystem
+│   └── persistence-sql/         # Persistenzadapter: PostgreSQL (via Exposed + Liquibase)
+└── applications/
+    ├── config/                  # Konfigurationsmodell (AppConfig, ConfigLoader)
+    ├── service/                 # Spring Boot REST-Service
+    └── cli/                     # Kommandozeilenanwendung (Clikt)
+----
+
+== Voraussetzungen
+
+[cols="1,2"]
+|===
+| Tool | Version / Hinweis
+
+| Java (JDK) | 25
+| Kotlin | 2.3.0 (wird über Maven verwaltet)
+| Docker | Nur für SQL-Tests erforderlich (siehe <<sql-tests>>)
+| (Optional) https://github.com/casey/just?tab=readme-ov-file#installation[just] | Aufgaben-Runner, wrappt Maven-Befehle für einfachere Nutzung (Maven-Befehle können auch direkt mit `./mvnw` ausgeführt werden)
+|===
+
+[NOTE]
+====
+Maven kann auch über den mitgelieferten Wrapper `./mvnw` ausgeführt werden – eine separate Maven-Installation ist nicht zwingend notwendig.
+====
+
+== Schnellstart
+
+=== Projekt bauen und testen
+
+[source,bash]
+----
+just test
+----
+
+Führt alle Tests aus. Docker ist *nicht* erforderlich – SQL-Tests sind initial deaktiviert (siehe <<sql-tests>>).
+
+=== Alle verfügbaren Befehle anzeigen
+
+[source,bash]
+----
+just
+----
+
+.Übersicht der wichtigsten Befehle
+[cols="1,3"]
+|===
+| Befehl | Beschreibung
+
+| `just test` | Alle Tests ausführen
+| `just build` | Projekt bauen und ins lokale Maven-Repository installieren
+| `just compile` | Nur kompilieren (ohne Tests)
+| `just service` | Spring Boot Service starten (erfordert vorheriges `just build`)
+| `just cli [args]` | CLI ausführen (erfordert vorheriges `just build`)
+| `just start-db` | PostgreSQL-Datenbank starten (erfordert Docker)
+| `just stop-db` | PostgreSQL-Datenbank stoppen
+| `just discard-db` | PostgreSQL-Datenbank stoppen und alle Daten löschen
+|===
+
+== Docker und PostgreSQL
+
+=== Docker installieren
+
+Docker Desktop kann unter https://www.docker.com/products/docker-desktop/ heruntergeladen und installiert werden.
+Nach der Installation muss Docker Desktop gestartet sein, bevor die folgenden Befehle ausgeführt werden können.
+
+=== PostgreSQL-Datenbank starten
+
+Eine lokale PostgreSQL-Datenbank ist über Docker Compose vorkonfiguriert:
+
+[source,bash]
+----
+just start-db
+----
+
+Die Datenbank ist anschließend unter `localhost:5432` erreichbar (Verbindungsdaten siehe `applications/config.json`).
+
+=== PostgreSQL-Datenbank stoppen
+
+[source,bash]
+----
+just stop-db
+----
+
+Um die Datenbank mit einem *frischen Zustand* (alle Daten gelöscht) neu zu starten:
+
+[source,bash]
+----
+just discard-db
+just start-db
+----
+
+[#sql-tests]
+== SQL-Tests aktivieren
+
+Die Tests, die Docker und PostgreSQL benötigen (`SqlPersistenceTest`, `ServiceSqlTest`, `CliSqlTest`), sind initial mit `@Disabled` annotiert.
+
+Sobald die SQL-Persistenz implementiert ist, kann die Annotation entfernt werden:
+
+[source,kotlin]
+----
+// @Disabled("Requires Docker")  // <-- diese Zeile entfernen
+@Testcontainers
+class SqlPersistenceTest { ... }
+----
+
+Danach benötigt `just test` eine laufende Docker-Instanz.
