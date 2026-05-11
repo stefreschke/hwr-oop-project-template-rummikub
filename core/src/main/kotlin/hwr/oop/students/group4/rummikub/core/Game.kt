@@ -6,7 +6,7 @@ class Game (
     fun pool() = pool
 
     companion object {
-        fun generateShuffledDeck(): Game{
+        fun startNewGame(): Game{
             val newTiles = (1..2).flatMap {
                 TileNumber.entries.flatMap { number ->
                     TileColor.entries.map { color ->
@@ -14,7 +14,7 @@ class Game (
                     }
                 }
             }.shuffled()
-            val pool = Pool(newTiles)
+            val pool = Pool(newTiles.toMutableList())
             return Game(pool)
         }
     }
