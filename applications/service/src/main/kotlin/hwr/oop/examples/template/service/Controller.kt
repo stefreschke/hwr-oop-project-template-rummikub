@@ -22,6 +22,9 @@ class Controller : GameApi, GameActionApi {
 		drawTileRequest: @Valid DrawTileRequest?,
 	): ResponseEntity<GameState>? {
 		TODO("Not yet implemented")
+		//val game = Game.loadGame(gameId)
+		//val updatedGame = game.drawTile(playerId)
+		//save(updatedGame)
 	}
 	
 	override fun playTiles(
@@ -29,6 +32,8 @@ class Controller : GameApi, GameActionApi {
 		playTilesRequest: @Valid PlayTilesRequest?,
 	): ResponseEntity<GameState> {
 		TODO("Not yet implemented")
+		//game = Game.load(gameId)
+
 	}
 	
 }
