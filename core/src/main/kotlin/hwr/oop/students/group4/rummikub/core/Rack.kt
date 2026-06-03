@@ -13,16 +13,12 @@ data class Rack(
     
     // Commands
     fun removeTiles(tilesToRemove: List<Tile>): Rack {
-        val playerTiles = tiles.toMutableList()
-
-        if ( playerTiles.removeAll(tilesToRemove)) {
+        val playerTiles = tiles.toMutableList().apply { tilesToRemove.forEach { remove(it) } }.toList()
             return copy(
                 playerId= owner(),
                 tiles = playerTiles,
                 melded = true)
-        } else {
-            throw IllegalStateException("Player rack does not contain $tilesToRemove")
-        }
+
     }
 
     fun addTiles(tilesToAdd: List<Tile>): Rack {

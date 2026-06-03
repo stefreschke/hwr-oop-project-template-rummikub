@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Assertions.assertTrue
+import java.util.UUID
+import kotlin.uuid.Uuid
 
 class BoardTest {
 	//given
@@ -84,53 +86,56 @@ class BoardTest {
 	fun`playtile meld successful`(){
 		//when
 		val game = Game(
-			rackOfPlayers = listOf(rack1, rack2),
-			currentPlayerIndex = 0,
+			racks = listOf(rack1, rack2),
 			board = Board(),
+			currentPlayer = player1,
 			pool = Pool(listOf(Tile(TileColor.BLUE, TileNumber.ONE))),
+			gameId = UUID.randomUUID(),
 		)
 		val newTable = Board(listOf(set1))
 		val updatedGame = game.playTiles(newTable, player1)
 
-		assertTrue(updatedGame.rackOfPlayer(player1).melded())
+		assertTrue(updatedGame.rackOf(player1).melded())
 		assertThat(updatedGame.board()).isEqualTo(newTable)
-		assertThat(updatedGame.rackOfPlayer(player1).tiles()).isEqualTo(listOf(
+		assertThat(updatedGame.rackOf(player1).tiles()).isEqualTo(listOf(
 			Tile(TileColor.BLUE, TileNumber.TWELVE),
 			Tile(TileColor.BLUE, TileNumber.ELEVEN),
 		))
 	}
 
-//	@Test
-//	fun`playtile post-meld manipulation successful, game finished`(){
-//		//when
-//		val game = Game(
-//			rackOfPlayers = listOf(rack1, rack2Alt),
-//			currentPlayerIndex = 0,
-//			board = Board(),
-//			pool = Pool(listOf(Tile(TileColor.BLUE, TileNumber.ONE))),
-//		)
-//		val newTable1 = Board(listOf(set1))
-//		val firstTurn = game.playTiles(newTable1, player1)
-//		val newTable2 = Board(listOf(set1, set2))
-//		val secondTurn = firstTurn.playTiles(newTable2, player2)
-//		val newTable3 = Board(listOf(set1Alt, set2, set3))
-//		val thirdTurn = secondTurn.playTiles(newTable3, player1)
-//
-//		assertThat(thirdTurn.board()).isEqualTo(newTable3)
-//		assertThat(thirdTurn.rackOfPlayer(player1).tiles()).isEqualTo(listOf<Tile>())
-//		assertTrue(thirdTurn.rackOfPlayer(player2).melded())
-//		assertTrue(thirdTurn.rackOfPlayer(player1).melded())
-//		//assertTrue(thirdTurn.winner() == player1)
-//		//assertTrue(thirdTurn.status() == GameStatus.FINISHED)
-//	}
+	@Test
+	fun`playtile post-meld manipulation successful, game finished`(){
+		//when
+		val game = Game(
+			racks = listOf(rack1, rack2Alt),
+			currentPlayer = player1,
+			board = Board(),
+			pool = Pool(listOf(Tile(TileColor.BLUE, TileNumber.ONE))),
+			gameId = UUID.randomUUID(),
+		)
+		val newTable1 = Board(listOf(set1))
+		val firstTurn = game.playTiles(newTable1, player1)
+		val newTable2 = Board(listOf(set1, set2))
+		val secondTurn = firstTurn.playTiles(newTable2, player2)
+		val newTable3 = Board(listOf(set1Alt, set2, set3))
+		val thirdTurn = secondTurn.playTiles(newTable3, player1)
+
+		assertThat(thirdTurn.board()).isEqualTo(newTable3)
+		assertThat(thirdTurn.rackOf(player1).tiles()).isEqualTo(listOf<Tile>())
+		assertTrue(thirdTurn.rackOf(player2).melded())
+		assertTrue(thirdTurn.rackOf(player1).melded())
+		assertTrue(thirdTurn.winner() == player1)
+		assertTrue(thirdTurn.status() == GameStatus.FINISHED)
+	}
 
 	@Test
 	fun `playtile failed, player not in players`(){
 		val game = Game(
-			rackOfPlayers = listOf(rack1, rack2),
-			currentPlayerIndex = 0,
+			racks = listOf(rack1, rack2),
+			currentPlayer = player1,
 			board = Board(),
 			pool = Pool(listOf(Tile(TileColor.BLUE, TileNumber.ONE))),
+			gameId = UUID.randomUUID(),
 		)
 		val newTable = Board(listOf(set1))
 		val troll = PlayerId("troll")
@@ -141,80 +146,86 @@ class BoardTest {
 	@Test
 	fun `playtile failed, player not current player`(){
 		val game = Game(
-			rackOfPlayers = listOf(rack1, rack2),
-			currentPlayerIndex = 0,
+			racks = listOf(rack1, rack2),
+			currentPlayer = player1,
 			board = Board(),
 			pool = Pool(listOf(Tile(TileColor.BLUE, TileNumber.ONE))),
+			gameId = UUID.randomUUID(),
 		)
 		val newTable = Board(listOf(set1))
 		assertThatThrownBy { game.playTiles(newTable, player2) }.isInstanceOf(IllegalArgumentException::class.java)
 		assertThatThrownBy { game.playTiles(newTable, player2) }.hasMessageContaining("Its not ${player2.playerId()}'s turn")
 	}
 
-//	@Test
-//	fun `playtile failed, new table is empty`(){
-//		val game = Game(
-//			rackOfPlayers = listOf(rack1, rack2),
-//			currentPlayer = player1,
-//			board = Board(),
-//			pool = Pool(listOf(Tile(TileColor.BLUE, TileNumber.ONE))),
-//		)
-//		val newTable = Board(listOf())
-//		assertThatThrownBy { game.playTiles(newTable, player1) }.isInstanceOf(IllegalArgumentException::class.java)
-//		assertThatThrownBy { game.playTiles(newTable, player1) }.hasMessageContaining("New Table cannot be empty")
-//	}
+	@Test
+	fun `playtile failed, new table is empty`(){
+		val game = Game(
+			racks = listOf(rack1, rack2),
+			currentPlayer = player1,
+			board = Board(),
+			pool = Pool(listOf(Tile(TileColor.BLUE, TileNumber.ONE))),
+			gameId = UUID.randomUUID(),
+		)
+		val newTable = Board(listOf())
+		assertThatThrownBy { game.playTiles(newTable, player1) }.isInstanceOf(IllegalArgumentException::class.java)
+		assertThatThrownBy { game.playTiles(newTable, player1) }.hasMessageContaining("When playing tiles,")
+	}
 
 	@Test
 	fun `playtile failed, set is invalid`(){
 		val game = Game(
-			rackOfPlayers = listOf(rack1, rack2),
-			currentPlayerIndex = 0,
+			racks = listOf(rack1, rack2),
+			currentPlayer = player1,
 			board = Board(),
 			pool = Pool(listOf(Tile(TileColor.BLUE, TileNumber.ONE))),
+			gameId = UUID.randomUUID(),
 		)
 		val newTable = Board(listOf(invalidSet))
 		assertThatThrownBy { game.playTiles(newTable, player1) }.isInstanceOf(IllegalArgumentException::class.java)
 		assertThatThrownBy { game.playTiles(newTable, player1) }.hasMessageContaining("Set is not valid group or run")
 	}
 
-//	@Test
-//	fun `playtile failed, valid set is not in hand`(){
-//		val game = Game(
-//			rackOfPlayers = listOf(rack1, rack2),
-//			currentPlayer = player1,
-//			board = Board(),
-//			pool = Pool(listOf(Tile(TileColor.BLUE, TileNumber.ONE))),
-//		)
-//		val newTable = Board(listOf(set2))
-//		assertThatThrownBy { game.playTiles(newTable, player1) }.isInstanceOf(IllegalArgumentException::class.java)
-//		assertThatThrownBy { game.playTiles(newTable, player1) }.hasMessageContaining("not in ${player1.playerId()}'s rack")
-//	}
+	@Test
+	fun `playtile failed, valid set is not in hand`(){
+		val game = Game(
+			racks = listOf(rack1, rack2),
+			currentPlayer = player1,
+			board = Board(),
+			pool = Pool(listOf(Tile(TileColor.BLUE, TileNumber.ONE))),
+			gameId = UUID.randomUUID(),
+		)
+		val newTable = Board(listOf(set2))
+		assertThatThrownBy { game.playTiles(newTable, player1) }.isInstanceOf(IllegalArgumentException::class.java)
+		assertThatThrownBy { game.playTiles(newTable, player1) }.hasMessageContaining("not in ${player1.playerId()}'s rack")
+	}
 
 	@Test
 	fun `playtile failed, invalid meld doesn't have enough points`(){
 		val game = Game(
-			rackOfPlayers = listOf(rack1, rack2),
-			currentPlayerIndex = 1,
+			racks = listOf(rack1, rack2),
+			currentPlayer = player2,
 			board = Board(),
 			pool = Pool(listOf(Tile(TileColor.BLUE, TileNumber.ONE))),
+			gameId = UUID.randomUUID(),
 		)
-		val newTable = Board(listOf<Set>(invalidMeld))
+		val newTable = Board(listOf(invalidMeld))
 		assertThatThrownBy { game.playTiles(newTable, player2) }.isInstanceOf(IllegalArgumentException::class.java)
 		assertThatThrownBy { game.playTiles(newTable, player2) }.hasMessageContaining("Initial meld requires")
 	}
 
-//	@Test
-//	fun `playtile failed, game is finished`(){
-//		val game = Game(
-//			rackOfPlayers = listOf(rack1, rack2),
-//			currentPlayer = player1,
-//			board = Board(),
-//			pool = Pool(listOf(Tile(TileColor.BLUE, TileNumber.ONE))),
-//		)
-//		val newTable = Board(listOf(set1Alt, set3))
-//		val turnOne = game.playTiles(newTable, player1)
-//		val newTable2 = Board(listOf(set1))
-//		assertThatThrownBy { turnOne.playTiles(newTable2, player2) }.isInstanceOf(IllegalArgumentException::class.java)
-//		assertThatThrownBy { turnOne.playTiles(newTable2, player2) }.hasMessageContaining("Game is finished")
-//	}
+	@Test
+	fun `playtile failed, game is finished`(){
+		val game = Game(
+			racks = listOf(rack1, rack2),
+			currentPlayer = player1,
+			board = Board(),
+			pool = Pool(listOf(Tile(TileColor.BLUE, TileNumber.ONE))),
+			gameId = UUID.randomUUID(),
+		)
+		val newTable = Board(listOf(set1Alt, set3))
+		val turnOne = game.playTiles(newTable, player1)
+		val newTable2 = Board(listOf(set1))
+		assertThatThrownBy { turnOne.playTiles(newTable2, player2) }.isInstanceOf(IllegalArgumentException::class.java)
+		assertThatThrownBy { turnOne.playTiles(newTable2, player2) }.hasMessageContaining("Game is finished")
+	}
 }

@@ -1,46 +1,56 @@
 package hwr.oop.students.group4.rummikub.core
 
-data class Game (
-    //private val gameId: String,
-    private val pool: Pool,
-    private val rackOfPlayers: List<Rack>,
-    private var currentPlayerIndex: Int = 0,
-    private val currentPlayer: PlayerId = rackOfPlayers[currentPlayerIndex].owner(),
-    private val board: Board = Board(),
+import java.util.UUID
 
-) {
+data class Game (
+    private val gameId : UUID,
+    private val pool: Pool,
+    private val racks: List<Rack>,
+    private val currentPlayer: PlayerId,
+    private val board: Board = Board(),
+    private val players: List<PlayerId> = racks.map { it.owner() },
+    private val gameStatus: GameStatus = GameStatus.IN_PROGRESS,
+    private val winner: PlayerId? = null,
+    ) {
     companion object {
         fun createNewGame(players: List<PlayerId>): Game {
             require(players.size in 2..4) { "Rummikub is always 2-4" }
             require(players.distinct().size == players.size) { "Players must have different names" }
+            val gameID = UUID.randomUUID()
             val newPool = Pool.createShuffledPool().toMutablePool()
             val racks = players.map { player -> Rack(player, newPool.draw(14))}
-            return Game(newPool.toPool(), racks)
+            val currentPlayer = racks[0].owner()
+            return Game(
+                gameID,
+                newPool.toPool(),
+                racks,
+                currentPlayer
+            )
         }
         //fun loadGame (gameState: GameState): Game {}
     }
     //Commands
     
     fun playTiles(newBoard: Board, player: PlayerId) : Game {
+        require(gameStatus != GameStatus.FINISHED) { "Game is finished" }
         require(newBoard.sets().all { SetType.entries.contains(it.type()) }) {"A set was not valid"}
         validatePlayer(player)
-        val currentRack = rackOfPlayer(player)
+        val currentRack = rackOf(player)
 
         val newBoardTiles = newBoard.tiles()
         val oldBoardTiles = board.tiles()
-        oldBoardTiles.forEach { oldTile -> require(newBoardTiles.contains(oldTile)) }
-
+        require(oldBoardTiles.isContainedIn(newBoardTiles)){ "New table is missing tiles from old table"}
         val addedTiles = newBoardTiles.toMutableList().apply { oldBoardTiles.forEach { remove(it) } }.toList()
         val points = addedTiles.sumOf { it.number().value() }
 
         require(addedTiles.isNotEmpty()) { "When playing tiles, new ones must be added to the board"}
-        addedTiles.forEach { tile -> require(tile in currentRack.tiles()) { "Tile is not in ${player.playerId()}'s rack" } }
+        require(addedTiles.isContainedIn(currentRack.tiles())){ "Tile is not in ${player.playerId()}'s rack" }
 
         if (!currentRack.melded()) {
             require(points >= 30) { "Initial meld requires having 30 or more points" }
         }
 
-        val updatedRacks = rackOfPlayers.map { rack ->
+        val updatedRacks = racks.map { rack ->
             if (rack.owner() == currentPlayer) {
                     rack.removeTiles(addedTiles)
             } else {
@@ -48,11 +58,22 @@ data class Game (
             }
         }
 
-        return copy(
-            board = newBoard,
-            rackOfPlayers = updatedRacks,
-            currentPlayerIndex = nextPlayerIndex()
-        )
+        return if (updatedRacks.any { it.tiles().isEmpty() }) {
+            copy (
+                gameId = gameId,
+                board = newBoard,
+                racks = updatedRacks,
+                gameStatus = GameStatus.FINISHED,
+                winner = currentPlayer,
+            )
+        } else {
+            copy(
+                gameId = gameId,
+                board = newBoard,
+                racks = updatedRacks,
+                currentPlayer = nextPlayer()
+            )
+        }
     }
 
     fun drawTile (player: PlayerId): Game {
@@ -61,7 +82,7 @@ data class Game (
         val newPool = pool.toMutablePool()
         val drawnTile = newPool.draw(1)
 
-        val updatedRacks: List<Rack> = rackOfPlayers.map { rack ->
+        val updatedRacks: List<Rack> = racks.map { rack ->
             if (rack.owner() == player) {
                 rack.addTiles(drawnTile)
             }   else {
@@ -69,10 +90,10 @@ data class Game (
             }
         }
         return copy (
+            gameId = gameId,
             pool = newPool.toPool(),
-            rackOfPlayers = updatedRacks,
-            currentPlayerIndex = nextPlayerIndex()
-            // currentPlayer does not get set, why?
+            racks = updatedRacks,
+            currentPlayer = nextPlayer()
         )
     }
 
@@ -81,23 +102,27 @@ data class Game (
         require(player == currentPlayer) { "Its not ${player.playerId()}'s turn" }
     }
 
+    fun List<Tile>.isContainedIn(other: List<Tile>): Boolean {
+        return this.groupingBy { it }
+            .eachCount()
+            .all { (element, requiredCount) ->
+                other.count { it == element } >= requiredCount
+            }
+    }
+
     //Queries
     fun pool() = pool
-   
     fun players(): List<PlayerId> {
-        return rackOfPlayers.map { it.owner()  }
+        return racks.map { it.owner()  }
     }
-   
-    fun rackOfPlayer(playerId: PlayerId): Rack {
-        validatePlayer(playerId)
-        return rackOfPlayers.find{ it.owner() == playerId }!!
+    fun rackOf(playerId: PlayerId): Rack {
+        require(playerId in players()){"Player is not in this game"}
+        return racks.find{ it.owner() == playerId }!!
     }
-    
-    fun racks() = rackOfPlayers //Added this just for the tests to work, please implement properly and fix tests in PoolTest.kt
-    
+    fun racks() = racks //Added this just for the tests to work, please implement properly and fix tests in PoolTest.kt
     fun board() = board
-    
     fun currentPlayer() = currentPlayer
-
-    fun nextPlayerIndex() = ((currentPlayerIndex + 1) % players().size)
+    fun nextPlayer(): PlayerId = players[((players.indexOf(currentPlayer) + 1) % players().size)]
+    fun status() = gameStatus
+    fun winner() = winner
 }

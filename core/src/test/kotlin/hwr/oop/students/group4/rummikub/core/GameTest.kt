@@ -5,6 +5,7 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
+import java.util.UUID
 import java.util.stream.Stream
 
 class GameTest {
@@ -96,7 +97,7 @@ class GameTest {
 		// given
 		val game = Game(
 			pool = Pool( listOf()),
-			rackOfPlayers = listOf(
+			racks = listOf(
 				Rack(
 					playerId = PlayerId("player1"),
 					tiles = mutableListOf()
@@ -106,8 +107,8 @@ class GameTest {
 					tiles = mutableListOf()
 				)
 			),
-			currentPlayerIndex = 0,
-			currentPlayer = PlayerId("player1")
+			currentPlayer = PlayerId("player1"),
+			gameId = UUID.randomUUID()
 		)
 		
 		// w/t -hen
@@ -126,7 +127,7 @@ class GameTest {
 
 
 		val newGame = game.drawTile(game.currentPlayer())
-		val newPlayerRack = newGame.rackOfPlayer(game.currentPlayer())
+		val newPlayerRack = newGame.rackOf(game.currentPlayer())
 		// then
 		assertThat(newPlayerRack.tiles()).contains(tileToBeDrawn)
 		assertThat(newGame.pool().tiles()).hasSize(pool.tiles().size - 1)
@@ -139,7 +140,7 @@ class GameTest {
 		// when
 		val intrudingPlayers = PlayerId("hacker")
 		//then
-		assertThatThrownBy{game.rackOfPlayer(intrudingPlayers)}.hasMessageContaining("Player is not in this game")
+		assertThatThrownBy{game.rackOf(intrudingPlayers)}.hasMessageContaining("Player is not in this game")
 	}
 }
 
