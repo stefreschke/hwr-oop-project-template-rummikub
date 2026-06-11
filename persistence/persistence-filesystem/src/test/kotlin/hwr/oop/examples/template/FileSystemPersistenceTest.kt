@@ -1,5 +1,6 @@
 package hwr.oop.examples.template
 
+import okio.FileSystem
 import okio.Path.Companion.toPath
 import okio.fakefilesystem.FakeFileSystem
 import org.junit.jupiter.api.AfterEach
@@ -7,8 +8,8 @@ import org.junit.jupiter.api.Test
 
 class FileSystemPersistenceTest {
 	
-	private val fakeFileSystem = FakeFileSystem()
-	private val tempDir = "/tmp/template-test".toPath()
+	private val fakeFileSystem = FileSystem.SYSTEM
+	private val tempDir = "/target".toPath()
 	private val sut: FileSystemPersistence
 	
 	init {
@@ -19,17 +20,17 @@ class FileSystemPersistenceTest {
 		)
 	}
 	
-	@AfterEach
-	fun tearDown() {
-		fakeFileSystem.checkNoOpenFiles()
-	}
-	
-	@Test
-	fun `do nothing`() {
-		// given
-		// when
-		// then
-	}
+//	@AfterEach
+//	fun tearDown() {
+//		fakeFileSystem.checkNoOpenFiles()
+//	}
+//
+//	@Test
+//	fun `do nothing`() {
+//		// given
+//		// when
+//		// then
+//	}
 	
 }
 

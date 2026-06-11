@@ -108,7 +108,7 @@ class GameTest {
 				)
 			),
 			currentPlayer = PlayerId("player1"),
-			gameId = UUID.randomUUID()
+			gameId = UUID.randomUUID().toString()
 		)
 		
 		// w/t -hen

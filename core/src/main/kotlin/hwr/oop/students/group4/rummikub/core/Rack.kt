@@ -1,5 +1,9 @@
 package hwr.oop.students.group4.rummikub.core
 
+import kotlinx.serialization.Serializable
+
+@Serializable
+
 data class Rack(
     private val playerId: PlayerId,
     private val tiles: List<Tile>,

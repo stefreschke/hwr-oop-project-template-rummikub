@@ -1,9 +1,11 @@
 package hwr.oop.students.group4.rummikub.core
 
+import kotlinx.serialization.Serializable
 import java.util.UUID
 
+@Serializable
 data class Game (
-    private val gameId : UUID,
+    private val gameId : String = UUID.randomUUID().toString(),
     private val pool: Pool,
     private val racks: List<Rack>,
     private val currentPlayer: PlayerId,
@@ -16,7 +18,7 @@ data class Game (
         fun createNewGame(players: List<PlayerId>): Game {
             require(players.size in 2..4) { "Rummikub is always 2-4" }
             require(players.distinct().size == players.size) { "Players must have different names" }
-            val gameID = UUID.randomUUID()
+            val gameID = UUID.randomUUID().toString()
             val newPool = Pool.createShuffledPool().toMutablePool()
             val racks = players.map { player -> Rack(player, newPool.draw(14))}
             val currentPlayer = racks[0].owner()
@@ -111,6 +113,7 @@ data class Game (
     }
 
     //Queries
+    fun gameId() = gameId
     fun pool() = pool
     fun players(): List<PlayerId> {
         return racks.map { it.owner()  }
