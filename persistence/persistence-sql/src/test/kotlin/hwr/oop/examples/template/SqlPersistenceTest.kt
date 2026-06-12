@@ -1,5 +1,4 @@
 package hwr.oop.examples.template
-
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import org.junit.jupiter.api.AfterEach
