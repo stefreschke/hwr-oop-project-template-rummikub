@@ -29,5 +29,7 @@ class InMemoryPersistenceTest {
         // then
         assertThat(loadedGame).isEqualTo(gameObject)
     }
+    @Test
+    fun `load game with empty game`() {}
 
 }

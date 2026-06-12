@@ -3,7 +3,7 @@ package hwr.oop.students.group4.rummikub.core
 import kotlinx.serialization.Serializable
 
 @Serializable
-class Board (
+data class Board (
     private val sets: List<Set> = emptyList(),
 ) {
     //Query
