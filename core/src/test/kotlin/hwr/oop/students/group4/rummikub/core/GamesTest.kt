@@ -8,7 +8,7 @@ import org.junit.jupiter.params.provider.MethodSource
 import java.util.UUID
 import java.util.stream.Stream
 
-class GameTest {
+class GamesTest {
 
 	companion object {
 		@JvmStatic
@@ -63,6 +63,7 @@ class GameTest {
 		
 		//then
 		assertThat(game.players()).containsExactlyInAnyOrder(*players.toTypedArray())
+		assertThat(game.racks()).isNotEmpty()
 		game.racks().forEach { assertThat(it.tiles()).hasSize(14) }
 		assertThat(game.pool().tiles()).hasSize(104 - 14 * players.size)
 	}
@@ -87,6 +88,7 @@ class GameTest {
 		//when
 		val gameObject = Game.createNewGame(validPlayers)
 		// then
+
 		assertThatThrownBy { gameObject.drawTile(secondPlayer) }
 			.isInstanceOf(IllegalArgumentException::class.java)
 			.hasMessageContaining("Its not ${secondPlayer.playerId()}'s turn")
@@ -129,6 +131,7 @@ class GameTest {
 		val newGame = game.drawTile(game.currentPlayer())
 		val newPlayerRack = newGame.rackOf(game.currentPlayer())
 		// then
+		assertThat(newPlayerRack).isNotNull()
 		assertThat(newPlayerRack.tiles()).contains(tileToBeDrawn)
 		assertThat(newGame.pool().tiles()).hasSize(pool.tiles().size - 1)
 	}
@@ -141,6 +144,22 @@ class GameTest {
 		val intrudingPlayers = PlayerId("hacker")
 		//then
 		assertThatThrownBy{game.rackOf(intrudingPlayers)}.hasMessageContaining("Player is not in this game")
+	}
+
+	@Test
+	fun `gameId query returns String`() {
+		//given
+		val game = Game(
+			gameId = "testgame",
+			pool = Pool(listOf()),
+			racks = listOf(),
+			currentPlayer = PlayerId("player1"),
+			gameStatus = GameStatus.IN_PROGRESS,
+		)
+		//when
+		val id = game.gameId()
+		//then
+		assertThat(id).isEqualTo("testgame")
 	}
 }
 

@@ -1,6 +1,10 @@
 package hwr.oop.examples.template
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import hwr.oop.students.group4.rummikub.core.Game
+import hwr.oop.students.group4.rummikub.core.PlayerId
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
@@ -39,13 +43,28 @@ class SqlPersistenceTest {
 			dataSource.close()
 		}
 	}
-	
+
 	@Test
-	fun `do nothing`() {
+	fun `save game and load game successful`() {
 		// given
+		val game = Game.createNewGame(listOf(PlayerId("player1"), PlayerId("player2")))
+		val gameId = game.gameId()
 		// when
+		adapter.save(game)
+		val savedGame = adapter.load(gameId)
 		// then
+		assertThat(savedGame).isEqualTo(game)
 	}
-	
+
+	@Test
+	fun `load game unsuccessful`() {
+		// given
+		val game = Game.createNewGame(listOf(PlayerId("player1"), PlayerId("player2")));
+		// when
+		adapter.save(game);
+		// then
+		assertThatThrownBy {adapter.load("trollId")}.hasMessageContaining("Game not found: trollId")
+	}
+
 }
 

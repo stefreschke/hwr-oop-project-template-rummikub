@@ -3,10 +3,11 @@ package hwr.oop.students.group4.rummikub.core
 import org.junit.jupiter.api.Test
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import java.util.UUID
 
-class BoardTest {
+class GameActionsTests {
 	//given
 	private val player1 = PlayerId("player1")
 	private val rack1 = Rack(player1, listOf(
@@ -208,6 +209,9 @@ class BoardTest {
 			gameId = UUID.randomUUID().toString(),
 		)
 		val newTable = Board(listOf(invalidMeld))
+		assertFalse(game.rackOf(player2).melded())
+		assertTrue(newTable.tiles().sumOf { tile -> tile.number().value() } < 30)
+		assertFalse(newTable.tiles().sumOf { tile -> tile.number().value() } == 30)
 		assertThatThrownBy { game.playTiles(newTable, player2) }.isInstanceOf(IllegalArgumentException::class.java)
 		assertThatThrownBy { game.playTiles(newTable, player2) }.hasMessageContaining("Initial meld requires")
 	}
@@ -220,11 +224,25 @@ class BoardTest {
 			board = Board(),
 			pool = Pool(listOf(Tile(TileColor.BLUE, TileNumber.ONE))),
 			gameId = UUID.randomUUID().toString(),
+			gameStatus = GameStatus.FINISHED,
+		)
+		val newTable = Board(listOf(invalidMeld))
+		assertThatThrownBy { game.playTiles(newTable, player2) }.isInstanceOf(IllegalArgumentException::class.java)
+		assertThatThrownBy { game.playTiles(newTable, player2) }.hasMessageContaining("Game is finished")
+	}
+
+	@Test
+	fun `drawtile failed, game is finished`(){
+		val game = Game(
+			racks = listOf(rack1, rack2),
+			currentPlayer = player1,
+			board = Board(),
+			pool = Pool(listOf(Tile(TileColor.BLUE, TileNumber.ONE))),
+			gameId = UUID.randomUUID().toString(),
 		)
 		val newTable = Board(listOf(set1Alt, set3))
 		val turnOne = game.playTiles(newTable, player1)
-		val newTable2 = Board(listOf(set1))
-		assertThatThrownBy { turnOne.playTiles(newTable2, player2) }.isInstanceOf(IllegalArgumentException::class.java)
-		assertThatThrownBy { turnOne.playTiles(newTable2, player2) }.hasMessageContaining("Game is finished")
+		assertThatThrownBy { turnOne.drawTile(player2) }.isInstanceOf(IllegalArgumentException::class.java)
+		assertThatThrownBy { turnOne.drawTile(player2) }.hasMessageContaining("Game is finished")
 	}
 }

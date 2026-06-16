@@ -29,16 +29,15 @@ data class Game (
                 currentPlayer
             )
         }
-        //fun loadGame (gameState: GameState): Game {}
     }
     //Commands
     
     fun playTiles(newBoard: Board, player: PlayerId) : Game {
         require(gameStatus != GameStatus.FINISHED) { "Game is finished" }
-        require(newBoard.sets().all { SetType.entries.contains(it.type()) }) {"A set was not valid"}
         validatePlayer(player)
-        val currentRack = rackOf(player)
+        newBoard.sets().all { SetType.entries.contains(it.type()) }
 
+        val currentRack = rackOf(player)
         val newBoardTiles = newBoard.tiles()
         val oldBoardTiles = board.tiles()
         require(oldBoardTiles.isContainedIn(newBoardTiles)){ "New table is missing tiles from old table"}
@@ -79,8 +78,10 @@ data class Game (
     }
 
     fun drawTile (player: PlayerId): Game {
+        require(gameStatus != GameStatus.FINISHED) { "Game is finished" }
         validatePlayer(player)
         require(pool.tiles().isNotEmpty()) { "Pool is empty" }
+
         val newPool = pool.toMutablePool()
         val drawnTile = newPool.draw(1)
 

@@ -1,10 +1,9 @@
 package hwr.oop.examples.template
 
-import Persistence
+import hwr.oop.students.group4.rummikub.core.Persistence
 import hwr.oop.students.group4.rummikub.core.Game
 import kotlinx.serialization.json.Json
 import okio.FileSystem
-import kotlin.io.path.exists
 
 class FileSystemPersistence(
 	configuration: FileSystemPersistenceConfiguration,
