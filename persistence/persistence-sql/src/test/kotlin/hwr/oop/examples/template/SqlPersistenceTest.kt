@@ -43,12 +43,7 @@ class SqlPersistenceTest {
 			dataSource.close()
 		}
 	}
-	
-	//@Test
-	//fun `do nothing`() {
-		// given
-		// when
-		// then}
+
 	@Test
 	fun `save game and load game successfully`() {
 		// given
