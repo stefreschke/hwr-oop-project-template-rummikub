@@ -65,7 +65,7 @@ class SqlPersistenceTest {
 		// when
 		// then
 		assertThatThrownBy { adapter.load(gameId) }
-			.hasMessageContaining("Game with id: $gameId not found")
+			.hasMessageContaining("Game $gameId not found")
 	}
 }
 
